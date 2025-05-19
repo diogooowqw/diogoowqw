@@ -5,176 +5,21 @@
 💼
 
 🛠️ Habilidades
+div>
+  <img src="https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white" />
+  <img src="https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white" />
+  <img src="https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E" />
+  <img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/TSX-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB" />
+  <img src="https://img.shields.io/badge/Material--UI-007FFF.svg?style=for-the-badge&logo=mui&logoColor=white" />
+  <img src="https://img.shields.io/badge/bootstrap-%23563D7C.svg?style=for-the-badge&logo=bootstrap&logoColor=white" />
+  <img src="https://img.shields.io/badge/tailwindcss-0EA5E9?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+  <img src="https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white" />
+  <img src="https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white" />
+  <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" />
+  <img src="https://img.shields.io/badge/shell_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white" />
+  <img src="https://img.shields.io/badge/Figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white" />
+  <img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+</div>
 
-
-import "@testing-library/jest-dom";
-import axios from "axios";
-import MockAdapter from "axios-mock-adapter";
-import { fetchTopLanguages } from "../src/fetchers/top-languages-fetcher.js";
-import { expect, it, describe, afterEach } from "@jest/globals";
-
-const mock = new MockAdapter(axios);
-
-afterEach(() => {
-  mock.reset();
-});
-
-const data_langs = {
-  data: {
-    user: {
-      repositories: {
-        nodes: [
-          {
-            name: "test-repo-1",
-            languages: {
-              edges: [{ size: 100, node: { color: "#0f0", name: "HTML" } }],
-            },
-          },
-          {
-            name: "test-repo-2",
-            languages: {
-              edges: [{ size: 100, node: { color: "#0f0", name: "HTML" } }],
-            },
-          },
-          {
-            name: "test-repo-3",
-            languages: {
-              edges: [
-                { size: 100, node: { color: "#0ff", name: "javascript" } },
-              ],
-            },
-          },
-          {
-            name: "test-repo-4",
-            languages: {
-              edges: [
-                { size: 100, node: { color: "#0ff", name: "javascript" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  },
-};
-
-const error = {
-  errors: [
-    {
-      type: "NOT_FOUND",
-      path: ["user"],
-      locations: [],
-      message: "Could not resolve to a User with the login of 'noname'.",
-    },
-  ],
-};
-
-describe("FetchTopLanguages", () => {
-  it("should fetch correct language data while using the new calculation", async () => {
-    mock.onPost("https://api.github.com/graphql").reply(200, data_langs);
-
-    let repo = await fetchTopLanguages("anuraghazra", [], 0.5, 0.5);
-    expect(repo).toStrictEqual({
-      HTML: {
-        color: "#0f0",
-        count: 2,
-        name: "HTML",
-        size: 20.000000000000004,
-      },
-      javascript: {
-        color: "#0ff",
-        count: 2,
-        name: "javascript",
-        size: 20.000000000000004,
-      },
-    });
-  });
-
-  it("should fetch correct language data while excluding the 'test-repo-1' repository", async () => {
-    mock.onPost("https://api.github.com/graphql").reply(200, data_langs);
-
-    let repo = await fetchTopLanguages("anuraghazra", ["test-repo-1"]);
-    expect(repo).toStrictEqual({
-      HTML: {
-        color: "#0f0",
-        count: 1,
-        name: "HTML",
-        size: 100,
-      },
-      javascript: {
-        color: "#0ff",
-        count: 2,
-        name: "javascript",
-        size: 200,
-      },
-    });
-  });
-
-  it("should fetch correct language data while using the old calculation", async () => {
-    mock.onPost("https://api.github.com/graphql").reply(200, data_langs);
-
-    let repo = await fetchTopLanguages("anuraghazra", [], 1, 0);
-    expect(repo).toStrictEqual({
-      HTML: {
-        color: "#0f0",
-        count: 2,
-        name: "HTML",
-        size: 200,
-      },
-      javascript: {
-        color: "#0ff",
-        count: 2,
-        name: "javascript",
-        size: 200,
-      },
-    });
-  });
-
-  it("should rank languages by the number of repositories they appear in", async () => {
-    mock.onPost("https://api.github.com/graphql").reply(200, data_langs);
-
-    let repo = await fetchTopLanguages("anuraghazra", [], 0, 1);
-    expect(repo).toStrictEqual({
-      HTML: {
-        color: "#0f0",
-        count: 2,
-        name: "HTML",
-        size: 2,
-      },
-      javascript: {
-        color: "#0ff",
-        count: 2,
-        name: "javascript",
-        size: 2,
-      },
-    });
-  });
-
-  it("should throw specific error when user not found", async () => {
-    mock.onPost("https://api.github.com/graphql").reply(200, error);
-
-    await expect(fetchTopLanguages("anuraghazra")).rejects.toThrow(
-      "Could not resolve to a User with the login of 'noname'.",
-    );
-  });
-
-  it("should throw other errors with their message", async () => {
-    mock.onPost("https://api.github.com/graphql").reply(200, {
-      errors: [{ message: "Some test GraphQL error" }],
-    });
-
-    await expect(fetchTopLanguages("anuraghazra")).rejects.toThrow(
-      "Some test GraphQL error",
-    );
-  });
-
-  it("should throw error with specific message when error does not contain message property", async () => {
-    mock.onPost("https://api.github.com/graphql").reply(200, {
-      errors: [{ type: "TEST" }],
-    });
-
-    await expect(fetchTopLanguages("anuraghazra")).rejects.toThrow(
-      "Something went wrong while trying to retrieve the language data using the GraphQL API.",
-    );
-  });
-});
